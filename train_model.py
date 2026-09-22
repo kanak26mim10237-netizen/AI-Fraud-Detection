@@ -1,4 +1,5 @@
 import pandas as pd
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
@@ -27,7 +28,9 @@ model = RandomForestClassifier(
 )
 
 model.fit(X_train, y_train)
-
+# Save trained model
+joblib.dump(model, "fraud_model.pkl")
+print("Model saved successfully!")
 # Predictions
 y_pred = model.predict(X_test)
 
