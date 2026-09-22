@@ -2,31 +2,46 @@ import streamlit as st
 import pandas as pd
 import joblib
 
+st.set_page_config(page_title="AI Fraud Detection", page_icon="💳")
+
 st.title("💳 AI Fraud Detection System")
+st.write("Upload transaction data to detect fraudulent transactions.")
 
-st.write("Enter transaction details to check whether a transaction may be fraudulent.")
+# Load trained model
+try:
+    model = joblib.load("fraud_model.pkl")
+    st.success("Model loaded successfully!")
+except FileNotFoundError:
+    st.error("fraud_model.pkl not found. Please train the model first.")
+    st.stop()
 
-amount = st.number_input("Transaction Amount", min_value=0.0, value=100.0)
-transaction_type = st.selectbox(
-    "Transaction Type",
-    ["Payment", "Transfer", "Cash Out", "Deposit"]
-)
+# Upload CSV
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
-if st.button("Check Transaction"):
-    try:
-        model = joblib.load("fraud_model.pkl")
+if uploaded_file is not None:
 
-        data = pd.DataFrame({
-            "amount": [amount],
-            "transaction_type": [transaction_type]
-        })
+    data = pd.read_csv(uploaded_file)
 
-        prediction = model.predict(data)[0]
+    st.subheader("Transaction Data")
+    st.dataframe(data.head())
 
-        if prediction == 1:
-            st.error("⚠️ Potential Fraud Detected")
-        else:
-            st.success("✅ Transaction Appears Normal")
+    if "Class" in data.columns:
 
-    except FileNotFoundError:
-        st.warning("Please train the model first.")
+        X = data.drop("Class", axis=1)
+
+        predictions = model.predict(X)
+
+        data["Prediction"] = predictions
+
+        st.subheader("Fraud Detection Results")
+        st.dataframe(data)
+
+        fraud = (predictions == 1).sum()
+        normal = (predictions == 0).sum()
+
+        st.write("### Results")
+        st.write("🚨 Fraud Transactions:", fraud)
+        st.write("✅ Normal Transactions:", normal)
+
+    else:
+        st.error("CSV file must contain a 'Class' column.")
