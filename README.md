@@ -62,10 +62,15 @@ AI-Fraud-Detection/
 │
 └── data/
     └── fraud.csv
+```
 ## How to Run the Project
 
 ### 1. Install Dependencies
-
 ```bash
 python -m pip install -r requirements.txt
 streamlit run app.py
+### 2. Run the Streamlit Application
+
+```bash
+streamlit run app.py
+
